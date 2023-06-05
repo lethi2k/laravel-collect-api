@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('pnb', [CurrencyController::class, 'pnb']);
 Route::get('vietcombank', [CurrencyController::class, 'index']);
 Route::get('bitkub/exchange-rate', [BitkubController::class, 'index']);
 

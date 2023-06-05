@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
+use Goutte\Client;
+use Symfony\Component\HttpClient\HttpClient;
+use Nesk\Rialto\Data\JsFunction;
+use Nesk\Puphpeteer\Puppeteer;
 
 class CurrencyController extends BaseController
 {
@@ -16,6 +19,33 @@ class CurrencyController extends BaseController
         }
 
         return $this->responseSuccess($list_curency, 'get data vietcommbank successfully!');
+    }
+
+    public function pnb()
+    {
+        $client = new Client(HttpClient::create(['timeout' => 60]));
+        $crawler = $client->request('GET', 'https://www.pnb.com.ph/index.php/foreign-exchange-rates');
+        $tableData = [];
+        $crawler->filter('.main table')->each(function ($row) use (&$tableData) {
+            $rowData = [];
+            $row->filter('td')->each(function ($cell) use (&$rowData) {
+                $rowData[] = $cell->text();
+            });
+
+            $tableData[] = $rowData;
+        });
+
+        $result = [];
+        $count = count($tableData[0]);
+        for ($i = 4; $i < $count; $i += 3) {
+            $result[] = [
+                'code' => $tableData[0][$i],
+                'buy' => $tableData[0][$i + 1],
+                'sell' => $tableData[0][$i + 2],
+            ];
+        }
+
+        return response()->json($result);
     }
 
 
